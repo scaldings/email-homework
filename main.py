@@ -8,7 +8,7 @@ from datetime import datetime, date
 
 def get_teacher_names():
 	names = []
-	with open('names.txt', 'r') as file:
+	with open('/home/lukas/Documents/Python/homework/names.txt', 'r') as file:
 		names = file.read().split('\n')
 	return names
 
@@ -21,7 +21,7 @@ def check_mails():
 
 	messages = int(messages[0])
 
-	for x in range(messages - 15, messages):
+	for x in range(messages, messages -15, -1):
 		mail_info = []
 		res, msg = imap.fetch(str(x), '(RFC822)')
 		for response in msg:
@@ -82,29 +82,14 @@ def filter_mails(mails: list):
 	return valid_mails
 
 
-def get_deadline(mail: list):
-	if mail[1] == 'Ivana Plachá':
-		return '16:00'
-	else:
-		for word in mail[3]:
-			if ':00' in word:
-				return word
-			elif ':30' in word:
-				return word
-			else:
-				pass
-	return 'Unknown'
-
-
 def format_mails(mails: list):
 	formatted_mails = []
 	for mail in mails:
 		formatted_mail = []
 		formatted_mail.append(f'Subject: {mail[0]}')
 		formatted_mail.append(f'From: {mail[1]}')
-		formatted_mail.append(f'Date: {mail[2]}')
+		formatted_mail.append(f'Date: {format_mail_date(mail[2])}')
 		formatted_mail.append(f'Body: {mail[3]}')
-		formatted_mail.append(f'Deadline: {get_deadline(mail)}')
 		formatted_mails.append(formatted_mail)
 	return formatted_mails
 
@@ -115,31 +100,9 @@ def format_mail_date(date: str):
 	return f'{date_temp[0]} {date_temp[1]} {date_temp[2]}'
 
 
-def filter_by_date(mails: list):
-	valid = []
-	for mail in mails:
-		mail_date = format_mail_date(str(mail[2]))
-		today = date.today().strftime('%b %d %Y')
-		if today.split(' ')[1] == mail_date.split(' ')[1]:
-			valid.append(mail)
-
-		if today.split(' ')[1][0] == '0':
-			if int(today.split(' ')[1][1]) - 1 == int(mail_date.split(' ')[1]):
-				valid.append(mail)
-		else:
-			if int(today.split(' ')[1]) - 1 == int(mail_date.split(' ')[1]):
-				valid.append(mail)
-
-		if today.split(' ')[1] == '1':
-			if mail_date.split(' ')[1] == '31':
-				valid.append(mail)
-			elif mail_date.split(' ')[1] == '30':
-				valid.append(mail)
-	return valid
-
-
 if __name__ == '__main__':
-	mails = format_mails(filter_by_date(filter_mails(check_mails())))
+	mails = format_mails(filter_mails(check_mails()))
+	print('*'*100)
 	if len(mails) != 0:
 		for mail in mails:
 			for x in mail:
@@ -147,4 +110,3 @@ if __name__ == '__main__':
 			print('*'*100)
 	else:
 		print('No assignments!')
-	
